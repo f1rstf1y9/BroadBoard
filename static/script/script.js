@@ -452,7 +452,22 @@ $(document).on('click', ".content-top__close", function (event) {
 })
 
 // 메인페이지 로그인 버튼 기능
-$(document).on('click', ".longin__func", function (event) {
+let login_info = {isLogin: false, id: null}
+
+function isLogin(){
+    if(login_info['isLogin'] == false) {
+        makeLogin();
+        $(".modal_content").css("padding-right", "0");
+        $(".modal_content").css("padding", "40px");
+        $(".modal").fadeIn();
+    } else {
+        login_info = {isLogin: false, id: null};
+        $(".login__btn").text('login');
+        $(".login__btn").css("background-color", "mediumseagreen");
+        $("#main-body > div.recommend-box > h2").text("지금, 이 보드게임 어때요?");
+    }
+}
+function makeLogin() {
     $(".modal_content").empty();
     let temp_html = `<div class="login__top">
                         <span class='content-top__close'><img src="../static/images/close-btn.png"></span>
@@ -466,15 +481,15 @@ $(document).on('click', ".longin__func", function (event) {
                             <label for="loginPwd">PASSWORD</label>
                             <input type="password" id="loginPwd" name="password" placeholder="비밀번호">
                         </div>
-                        <span class="login__hint">아이디, 비밀번호를 입력해주세요.</span>
-                        <button type="submit">LOG IN</button>
+                        <span class="login__hint"></span>
+                        <button type="submit" onclick="isLoginValid()" >LOG IN</button>
                         <br>
                         <span>계정이 없으신가요? <a href="#" class="join">가입하기</a></span>
                     </div>`
     $(".modal_content").append(temp_html);
-    $(".modal_content").css("padding-right", "0");
-    $(".modal_content").css("padding", "40px");
-    $(".modal").fadeIn();
+}
+$(document).on('click', ".longin__func", function (event) {
+    isLogin();
 });
 
 $(document).on('click', ".join", function (event) {
@@ -491,11 +506,82 @@ $(document).on('click', ".join", function (event) {
                             <label for="loginPwd">PASSWORD</label>
                             <input type="password" id="joinPwd" name="password" placeholder="비밀번호">
                         </div>
-                        <span class="join__hint">아이디, 비밀번호를 입력해주세요.</span>
-                        <button type="submit">Creat Account</button>
+                        <span class="join__hint"></span>
+                        <button type="submit" onclick="isJoinValid()">Creat Account</button>
                         <br>
                         <br>
                         <span>아이디가 있으신가요? <a href="#" class="longin__func">로그인하기</a></span>
                     </div>`
     $(".modal_content").append(temp_html);
 })
+
+
+// 회원가입 기능
+let member_list = [
+    {id: 'id', pwd: 'password'}
+]
+
+function isJoinValid() {
+    let id = $('#joinId').val()
+    let pwd = $('#joinPwd').val()
+    if (!id || !pwd) {
+        $(".join__hint").text("아이디, 비밀번호를 입력해주세요.");
+        return;
+    } else {
+        let expression = RegExp(/[^a-zA-Z]/);
+        if (expression.test($("#joinId").val()) || id.length < 2){
+            $(".join__hint").text("아이디를 영문 2글자 이상으로 만들어주세요.");
+        } else {
+            for (let i = 0; i < member_list.length; i++) {
+                if (member_list[i]['id'] == id) {
+                    $(".join__hint").text("이미 존재하는 아이디입니다.");
+                    return;
+                }
+                makeMember();
+            }
+
+
+        }
+    }
+
+}
+function makeMember() {
+    $(".join__hint").text("");
+    let id = $('#joinId').val()
+    let pwd = $('#joinPwd').val()
+    member_list.push({id: id, pwd: pwd})
+    alert('가입을 축하합니다! 로그인 창으로 이동합니다.')
+    makeLogin();
+}
+
+// 로그인 기능
+function isLoginValid() {
+    let id = $('#loginId').val()
+    let pwd = $('#loginPwd').val()
+    if (!id || !pwd) {
+        $(".login__hint").text("아이디, 비밀번호를 입력해주세요.");
+        return;
+    } else {
+        let i;
+        for (i = 0; i < member_list.length; i++) {
+            if (member_list[i]['id'] == id) {
+                if ((member_list[i]['pwd'] == pwd)) {
+                    login_info = {isLogin: true, id: id}
+                    $(".login__btn").css("background-color", "seagreen");
+                    $(".login__btn").text('logout');
+                    $("#main-body > div.recommend-box > h2").text(login_info["id"] + "님! 지금, 이 보드게임 어때요?");
+                    alert('로그인 완료!');
+                    $(".modal").hide();
+                    return;
+                } else {
+                    $(".login__hint").text("비밀번호가 틀렸습니다.");
+                    return;
+                }
+            }
+        }
+        console.log(i);
+        if (i == member_list.length) {
+            $(".login__hint").text("회원 정보가 없습니다.");
+        }
+    }
+}
