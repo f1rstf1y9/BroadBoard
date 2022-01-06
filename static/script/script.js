@@ -139,7 +139,6 @@ $('#title_arr').click(function () { //제목 ㄱㄴㄷ순 정렬
     result = cards_arr.sort(function (a, b) {
         return a.title < b.title ? -1 : a.title > b.title ? 1 : 0
     });
-    console.log(result);
     for (let i = 0; i < result.length; i++) {
         $("#cardHolder2").append(result[i].t_html);
     }
@@ -150,7 +149,6 @@ $('#time_arr').click(function () { //플탐순 정렬
     result = cards_arr.sort(function (a, b) {
         return a.play_time - b.play_time //작은 순 정렬
     });
-    console.log(result);
     for (let i = 0; i < result.length; i++) {
         $("#cardHolder2").append(result[i].t_html);
     }
@@ -163,7 +161,6 @@ function btn_next() {
     $('#cardHolder2').css('display', 'grid')
     var k_str = "";
     active_elements = document.getElementsByClassName('btn-clicked');
-    console.log(active_elements);
     k_str = "";
     for (var i = 0; i < active_elements.length; i++) {
         if (k_str == "")
@@ -171,7 +168,6 @@ function btn_next() {
         else
             k_str = k_str + "," + active_elements[i].innerHTML;
     }
-    console.log(k_str);
     if (k_str == "") {
         alert('1개 이상의 키워드를 선택해 주세요!')
     } else {
@@ -375,7 +371,6 @@ $(document).on('click', ".card", function (event) {
         data: {},
         success: function (response) {
             let games = response['all_games']
-            console.log(games)
             for (let i = 0; i < games.length; i++) {
                 let rb_img = games[i]['S3_img']
                 let rb_category = games[i]['category']
@@ -454,8 +449,8 @@ $(document).on('click', ".content-top__close", function (event) {
 // 메인페이지 로그인 버튼 기능
 let login_info = {isLogin: false, id: null}
 
-function isLogin(){
-    if(login_info['isLogin'] == false) {
+function isLogin() {
+    if (login_info['isLogin'] == false) {
         makeLogin();
         $(".modal_content").css("padding-right", "0");
         $(".modal_content").css("padding", "40px");
@@ -467,6 +462,7 @@ function isLogin(){
         $("#main-body > div.recommend-box > h2").text("지금, 이 보드게임 어때요?");
     }
 }
+
 function makeLogin() {
     $(".modal_content").empty();
     let temp_html = `<div class="login__top">
@@ -488,6 +484,7 @@ function makeLogin() {
                     </div>`
     $(".modal_content").append(temp_html);
 }
+
 $(document).on('click', ".longin__func", function (event) {
     isLogin();
 });
@@ -529,29 +526,46 @@ function isJoinValid() {
         return;
     } else {
         let expression = RegExp(/[^a-zA-Z]/);
-        if (expression.test($("#joinId").val()) || id.length < 2){
+        if (expression.test($("#joinId").val()) || id.length < 2) {
             $(".join__hint").text("아이디를 영문 2글자 이상으로 만들어주세요.");
         } else {
-            for (let i = 0; i < member_list.length; i++) {
-                if (member_list[i]['id'] == id) {
-                    $(".join__hint").text("이미 존재하는 아이디입니다.");
-                    return;
+            $.ajax({
+                type: "GET",
+                url: "/member",
+                data: {},
+                success: function (response) {
+                    let members = response['all_members']
+                    let i;
+                    for (i = 0; i < members.length; i++) {
+                        if (members[i]['id'] == id) {
+                            $(".join__hint").text("이미 존재하는 아이디입니다.");
+                            return;
+                        }
+                    }
+                    if (i == members.length) {
+                        makeMember();
+                    }
                 }
-                makeMember();
-            }
-
+            })
 
         }
     }
 
 }
+
 function makeMember() {
     $(".join__hint").text("");
     let id = $('#joinId').val()
     let pwd = $('#joinPwd').val()
-    member_list.push({id: id, pwd: pwd})
-    alert('가입을 축하합니다! 로그인 창으로 이동합니다.')
-    makeLogin();
+    $.ajax({
+        type: "POST",
+        url: "/member",
+        data: {id_give: id, pwd_give: pwd},
+        success: function (response) {
+            alert(response["msg"]);
+            makeLogin();
+        }
+    })
 }
 
 // 로그인 기능
@@ -562,26 +576,33 @@ function isLoginValid() {
         $(".login__hint").text("아이디, 비밀번호를 입력해주세요.");
         return;
     } else {
-        let i;
-        for (i = 0; i < member_list.length; i++) {
-            if (member_list[i]['id'] == id) {
-                if ((member_list[i]['pwd'] == pwd)) {
-                    login_info = {isLogin: true, id: id}
-                    $(".login__btn").css("background-color", "seagreen");
-                    $(".login__btn").text('logout');
-                    $("#main-body > div.recommend-box > h2").text(login_info["id"] + "님! 지금, 이 보드게임 어때요?");
-                    alert('로그인 완료!');
-                    $(".modal").hide();
-                    return;
-                } else {
-                    $(".login__hint").text("비밀번호가 틀렸습니다.");
-                    return;
+        $.ajax({
+            type: "GET",
+            url: "/member",
+            data: {},
+            success: function (response) {
+                let members = response['all_members']
+                let i;
+                for (i = 0; i < members.length; i++) {
+                    if (members[i]['id'] == id) {
+                        if ((members[i]['pwd'] == pwd)) {
+                            login_info = {isLogin: true, id: id};
+                            $(".login__btn").css("background-color", "seagreen");
+                            $(".login__btn").text('logout');
+                            $("#main-body > div.recommend-box > h2").text(login_info["id"] + "님! 지금, 이 보드게임 어때요?");
+                            alert('로그인 완료!');
+                            $(".modal").hide();
+                            return;
+                        } else {
+                            $(".login__hint").text("비밀번호가 틀렸습니다.");
+                            return;
+                        }
+                    }
+                }
+                if (i == members.length) {
+                    $(".login__hint").text("회원 정보가 없습니다.");
                 }
             }
-        }
-        console.log(i);
-        if (i == member_list.length) {
-            $(".login__hint").text("회원 정보가 없습니다.");
-        }
+        })
     }
 }
