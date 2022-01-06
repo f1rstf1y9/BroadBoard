@@ -85,8 +85,10 @@ function gameKeywordFinder() {
                             cnt++;
                         }
                     } else {
-                        if (keywords[key - 1] === category) {
-                            cnt++;
+                        for (let n = 0; n < category.length; n++) {
+                            if (keywords[key - 1] === category[n][n+1]) {
+                                cnt++;
+                            }
                         }
                     }
                 }
