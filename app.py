@@ -30,11 +30,19 @@ def view_games():
 @app.route('/like', methods=['POST'])
 def push_like():
     # 좋아요
-    ID_receive = request.form['id_give']
-    game_receive = request.form['game_give']
+    ID_receive = request.form['id_give']  ##id 값 받아오기
+    game_receive = request.form['game_give']  ## recommend 에 넣을 id 가 어디 게임인지 알려줄 게임제목
+    recommend_receive = request.form['recommend_give']  ## 좋아요 제거할 때
 
-    db.newgamelist_ek.update_one({'title': game_receive},{'$push' : {'recommend':ID_receive}})
-    return jsonify({'msg': '추천했습니다!'})
+    ##rocommend 속 id 제거/추가 기능 조건문
+    if (recommend_receive == 'true'):
+        db.newgamelist_ek.update_one({'title': game_receive}, {'$pull': {'recommend': ID_receive}})
+        return jsonify({'msg': '추천을 취소했습니다.'})
+    elif (recommend_receive == 'false'):
+        db.newgamelist_ek.update_one({'title': game_receive}, {'$push': {'recommend': ID_receive}})
+        return jsonify({'msg': '추천했습니다.'})
+
+
 
 @app.route('/member', methods=['POST'])
 def input_member():
