@@ -1,9 +1,9 @@
-// 게임 이름 검색 버튼 누를 시 나타나는 검색 결과 구역
+// 게임 이름 검색 버튼 누를 시 나타나는 검색 결과 구역  - 은경
 $(".text-search-btn").click(function () {
     $(".text-result-section").show();
 });
 
-// 우측 네비게이션 리모콘 가이드 함수
+// 우측 네비게이션 리모콘 가이드 함수 - 은경
 $("#menu > li > a:nth-child(2)").mouseenter(function () {
     $(this).siblings().removeClass('hide-nav');
 
@@ -12,7 +12,7 @@ $("#menu > li a:nth-child(2)").mouseleave(function () {
     $(this).siblings().addClass('hide-nav');
 });
 
-// 키워드 페이지 버튼 함수
+// 키워드 페이지 버튼 함수 - 종원
 $("#number .select-btn").click(function () {
     $("#number .select-btn").not(this).removeClass("btn-clicked");
     $(this).toggleClass("btn-clicked");
@@ -26,15 +26,14 @@ $("#genre .select-btn").click(function () {
     $(this).toggleClass("btn-clicked");
 });
 
-
-// 키워드 검색용 배열
+// 키워드 검색용 배열 - 은경
 var keywords = [
     2, 3, 4, 5, 6, 7,
     '친구와 함께', '연인과 함께', '가족과 함께', '아이스브레이킹',
     '추리', '카드', '전략', '가족', '역동적'
 ];
 
-//인원 수 검색에서 range를 array로 만드는 함수
+//인원 수 검색에서 range를 array로 만드는 함수 - 은경
 function range(start, end) {
     var ans = [];
     for (let i = start; i <= end; i++) {
@@ -45,7 +44,7 @@ function range(start, end) {
 
 let cards_arr = [];
 
-// 키워드 검색 버튼 함수
+// 키워드 검색 버튼 함수 - 은경 / 종원
 function gameKeywordFinder() {
     cards_arr = [];
     const clicked_keys = [];
@@ -85,10 +84,8 @@ function gameKeywordFinder() {
                             cnt++;
                         }
                     } else {
-                        for (let n = 0; n < category.length; n++) {
-                            if (keywords[key - 1] === category[n][n+1]) {
-                                cnt++;
-                            }
+                        if (keywords[key - 1] === category) {
+                            cnt++;
                         }
                     }
                 }
@@ -105,7 +102,9 @@ function gameKeywordFinder() {
                                   </div>
                                 </div>`;
                     $("#cardHolder2").append(temp_html);
-                    let temp_arr = {key: j, title: title, play_time: play_time.slice(0, -1), t_html: temp_html}
+                    let temp_arr = {
+                        key: j, title: title, play_time: play_time.slice(0, -1), t_html: temp_html
+                    }
                     cards_arr.push(temp_arr);
                 }
                 const newRoot = document.querySelector("#result");
@@ -133,14 +132,14 @@ function gameKeywordFinder() {
     });
 }
 
-// 카드 정렬
-
+// 카드 정렬 - 은경
 $('#title_arr').click(function () { //제목 ㄱㄴㄷ순 정렬
     $("#cardHolder2").empty();
     var result;
     result = cards_arr.sort(function (a, b) {
         return a.title < b.title ? -1 : a.title > b.title ? 1 : 0
     });
+
     for (let i = 0; i < result.length; i++) {
         $("#cardHolder2").append(result[i].t_html);
     }
@@ -151,18 +150,19 @@ $('#time_arr').click(function () { //플탐순 정렬
     result = cards_arr.sort(function (a, b) {
         return a.play_time - b.play_time //작은 순 정렬
     });
+
     for (let i = 0; i < result.length; i++) {
         $("#cardHolder2").append(result[i].t_html);
     }
 });
 
-//찾아주세요! 버튼 함수 (아무것도 누르지 않았을때, 결과페이지에 누른 버튼 삽입)
-//찾아주세요! 버튼 함수 (아무것도 누르지 않았을때 alert, 결과페이지에 누른 버튼 삽입)
+//찾아주세요! 버튼 함수 (아무것도 누르지 않았을때 alert, 결과페이지에 누른 버튼 삽입) - 은경
 function btn_next() {
     $(".selected-items").empty();
     $('#cardHolder2').css('display', 'grid')
     var k_str = "";
     active_elements = document.getElementsByClassName('btn-clicked');
+
     k_str = "";
     for (var i = 0; i < active_elements.length; i++) {
         if (k_str == "")
@@ -170,6 +170,7 @@ function btn_next() {
         else
             k_str = k_str + "," + active_elements[i].innerHTML;
     }
+
     if (k_str == "") {
         alert('1개 이상의 키워드를 선택해 주세요!')
     } else {
@@ -177,7 +178,7 @@ function btn_next() {
     }
 }
 
-// 메인 페이지 텍스트 검색 함수
+// 메인 페이지 텍스트 검색 함수 - 은경
 function gameTextFinder() {
     $('#autoMaker').hide();
     let newValue = document.querySelector(".search-input").value;
@@ -191,11 +192,6 @@ function gameTextFinder() {
         success: function (response) {
             let games = response['all_games'];
             for (let i = 0; i < games.length; i++) {
-                let num_person = games[i]['num_person'];
-                let play_time = games[i]['play_time'];
-                let img = games[i]['img'];
-                let category = games[i]['category'];
-                let when = games[i]['when'];
                 let title = games[i]['title'];
                 let rb_img = games[i]['S3_img']
                 let temp_html = ``;
@@ -229,7 +225,7 @@ function gameTextFinder() {
     });
 }
 
-// 자동완성 배열 만들기
+// 자동완성 배열 만들기 - 은경
 var ref = [];
 
 $.ajax({
@@ -245,7 +241,7 @@ $.ajax({
     },
 });
 
-// 자동완성 함수
+// 자동완성 함수 - 은경
 var isComplete = false;  //autoMaker 자식이 선택 되었는지 여부
 $('.search-input').keyup(function () {
     var txt = $(this).val();
@@ -280,7 +276,7 @@ $('.search-input').keydown(function (event) {
 })
 
 
-// 메인페이지 랜덤 추천
+// 메인페이지 랜덤 추천 - 은경
 const selectIndex = (totalIndex, selectingNumber) => {
     let randomIndexArray = []
     for (let i = 0; i < selectingNumber; i++) {   //check if there is any duplicate index
@@ -327,8 +323,13 @@ window.onload = function () {
         }
     },)
 }
+// let i = 10
+// let j = '10'
+// i == j true (type을 따지지 않고 값만)
+// i === j false (type까지 따짐)
 
-// dark mode
+
+// dark mode - 종원
 let isBright = true;
 const darkModeBtn = document.querySelector(".dark-mode-btn");
 $("button.dark-mode-btn").click(function () {
@@ -360,93 +361,297 @@ $("button.dark-mode-btn").click(function () {
     }
 });
 
-// 모달창 생성
+
+let newCommentInfo = {title: '', id: '', comment: ''}
+// 모달창 생성 - 종원
 $(document).on('click', ".card", function (event) {
     $(".modal_content").empty();
     let target_path_1 = $(this)[0]
     let target_path_2 = target_path_1.querySelector('.game-title').innerText
     let target_path_3 = target_path_1.querySelector('img').attributes[0].value
-
+    let temp_comments
     $.ajax({
         type: "GET",
-        url: "/search",
+        url: "/comment",
         data: {},
         success: function (response) {
-            let games = response['all_games']
-            for (let i = 0; i < games.length; i++) {
-                let rb_img = games[i]['S3_img']
-                let rb_category = games[i]['category']
-                let rb_desc = games[i]['desc']
-                let rb_person = games[i]['num_person']
-                let rb_playtime = games[i]['play_time']
-                let rb_title = games[i]['title']
-                let rb_when = games[i]['when']
-                let rb_yt_link = games[i]['youtube_link']
-                let rb_yt_title = games[i]['youtube_titlle']
+            let comment_data = response['comment_data']
+            for (let i = 0; i < comment_data.length; i++) {
+                let gameComments = comment_data[i]['COMMENT']
+                let gameTitle = comment_data[i]['title']
 
+                if (target_path_2 === gameTitle) {
+                    let temp_comment = gameComments.map((data) => {
+                        return `<li><span>${data.ID}</span><span>${data.comment}</span></li>`
 
-                if (target_path_2 === rb_title) {
-                    let desc_1 = rb_desc.substr(0, 26)
-                    let desc_2 = rb_desc.substr(26)
-                    let yt_title_1 = rb_yt_title.substr(0, 26)
-                    let yt_title_2 = rb_yt_title.substr(26)
+                    })
+                    temp_comments = temp_comment.toString().replaceAll(",", "")
 
-                    let temp_html = `
-    
-      <div class="content-inner">
-          <div class="content-left">
-            <div class="content-left__img"><img src="${rb_img}"></div>
-          </div>
-  
-          <div class="content-right">
-            <div class="content-info">
-              <div class="info-top">
-                <span class='content-top__close'><img src="../static/images/close-btn.png"></span>
-              </div>
-              <div class ="info-content">
-                <span class="content-top__title">${rb_title}</span>
-              </div>
-               <div class="info-content">
-                <span class="content-rule">
-                  <b>난이도</b> Normal
-                </span>
-                <span class="content-rule">
-                  <b>인원</b> ${rb_person}
-                </span>
-                <span class="content-rule">
-                  <b>게임시간</b> ${rb_playtime}
-                </span>
-              </div>
-              <div class="info-content">
-                <div class="info-content__detail">
-                  <p>${desc_1}${desc_2} 
-                  </p>
-                </div>
-              </div>
-           
-              <div class="info-content">
-                <b>게임 소개 영상</b>
-                <a href="${rb_yt_link}" target="_blank" class="content_url"><svg xmlns="http://www.w3.org/2000/svg" fill="tomato" width="24" height="24" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></a>
-              </div>
-            </div>
-          </div>
-      </div>
-    
-    `;
-                    $(".modal_content").append(temp_html);
-                } else if (target_path_3 == 'undefined') {
-                    $('.modal').fadeOut()
+                    console.log($('.interaction-comment'))
                 }
+
+
 
             }
 
         }
     })
+    $.ajax({
+            type: "GET",
+            url: "/search",
+            data: {},
+            success: function (response) {
+                let games = response['all_games']
+                for (let i = 0; i < games.length; i++) {
+                    let rb_img = games[i]['S3_img']
+                    let rb_category = games[i]['category']
+                    let rb_desc = games[i]['desc']
+                    let rb_person = games[i]['num_person']
+                    let rb_playtime = games[i]['play_time']
+                    let rb_title = games[i]['title']
+                    let rb_when = games[i]['when']
+                    let rb_yt_link = games[i]['youtube_link']
+                    let rb_level = games[i]['level']
+                    let KEY = rb_title.replace(" ","")
+                    let likes_num = games[i]['recommend'].length
+                    let like = games[i]['recommend']
+                    let n;
+                    let like_svg = `<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="20" height="20" viewBox="0 0 24 24"><path d="M12 9.229c.234-1.12 1.547-6.229 5.382-6.229 2.22 0 4.618 1.551 4.618 5.003 0 3.907-3.627 8.47-10 12.629-6.373-4.159-10-8.722-10-12.629 0-3.484 2.369-5.005 4.577-5.005 3.923 0 5.145 5.126 5.423 6.231zm-12-1.226c0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-7.962-9.648-9.028-12-3.737-2.338-5.262-12-4.27-12 3.737z"/></svg>`;
+                    for (n = 0; n < like.length; n++) {
+                        if (like[n] == login_info.id){
+                            like_svg = `<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="20" height="20" viewBox="0 0 24 24"><path d="M12 4.435c-1.989-5.399-12-4.597-12 3.568 0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-8.118-10-8.999-12-3.568z"/></svg>`
+                        }
+                    }
+                    if (target_path_2 === rb_title) {
+                        newCommentInfo.title = rb_title
+                        newCommentInfo.id = login_info.id
+
+                        let desc_1 = rb_desc.substr(0, 26)
+                        let desc_2 = rb_desc.substr(26)
+
+
+                        let temp_html = `
+    
+                                          <div class="content-inner" >
+                                              <div class="content-left">
+                                                <div class="content-left__img"><img src="${rb_img}"></div>
+                                              </div>
+                                      
+                                              <div class="content-right">
+                                                <div class="content-info">
+                                                  <div class="info-top">
+                                                    <span class='content-top__close'><img src="../static/images/close-btn.png"></span>
+                                                  </div>
+                                                  <div class ="info-content">
+                                                    <span class="content-top__title">${rb_title}</span>
+                                                  </div>
+                                                   <div class="info-content">
+                                                    <span class="content-rule">
+                                                      <b>난이도</b> ${rb_level}
+                                                    </span>
+                                                    <span class="content-rule">
+                                                      <b>인원</b> ${rb_person}
+                                                    </span>
+                                                    <span class="content-rule">
+                                                      <b>게임시간</b> ${rb_playtime}
+                                                    </span>
+                                                  </div>
+                                                  <div class="info-content">
+                                                    <div class="info-content__detail">
+                                                      <p>${desc_1}${desc_2} 
+                                                      </p>
+                                                    </div>
+                                                  </div>
+                                                  <div class="info-content">
+                                                    <b>게임 소개 영상</b>
+                                                    <a href="${rb_yt_link}" target="_blank" class="content_url"><svg xmlns="http://www.w3.org/2000/svg" fill="tomato" width="24" height="24" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></a>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <form class="content-bottom" id=${KEY}>
+                                                <div class="content-interaction">
+                                                    <div class="interaction-button">
+                                                    <button type="button" class="recommend-btn" id=${KEY}>
+                                                        ${like_svg}
+                                                        <b class="recommend-number">${likes_num}</b>
+                                                    </button>
+                                                    <button>댓글</button>
+                                                    </div>
+                                                    <ul class="interaction-comment" id="${KEY}">
+                                                         ${temp_comments}
+                                                    </ul>
+                                                    <div class="interaction-input"><input class="interaction-input__comment" type="text" placeholder="댓글 달기..." /><button type="submit">게시</button></div>
+                                                </div>      
+                                              </form>
+                                          </div>
+                                        
+                                        `;
+                        $(".modal_content").append(temp_html);
+                    } else if (target_path_3 == 'undefined') {
+                        $('.modal').fadeOut()
+                    }
+                }
+
+                $(".content-bottom").submit(function (event) {
+                        event.preventDefault()
+                        const newComment = event.target[2]
+                        newCommentInfo.comment = newComment.value
+                        console.log(newCommentInfo.title, newCommentInfo.id, newCommentInfo.comment)
+                        if (newCommentInfo.id === null) {
+                            alert('로그인을 먼저 해주세요')
+                            return
+                        }
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/comment",
+                            data: {
+                                game_title_give: newCommentInfo.title,
+                                ID_give: newCommentInfo.id,
+                                comment_give: newCommentInfo.comment,
+                            },
+                            success: function (response) {
+                            }
+                        })
+
+                        if (target_path_2 === newCommentInfo.title) {
+                            let temp_html = `<li><span>${login_info.id}</span><span>${newComment.value}</span></li>`
+
+                            if (newComment.value.trim().length > 0) {
+                                $(".interaction-comment").append(temp_html)
+                            }
+                            newComment.value = ""
+                        }
+
+                    }
+                )
+
+            }
+        }
+    )
     $('.modal').fadeIn()
+
 })
 $(document).on('click', ".content-top__close", function (event) {
     $('.modal').fadeOut()
 })
+
+//좋아요 함수
+// $(document).on('click', '.recommend-btn', function (event) {
+//     let target_game = $(this).attr('id')
+//     let cur_likes = document.querySelector("b.recommend-number").innerText
+//     if (login_info.id == null){
+//         alert('로그인을 먼저 해주세요')
+//         makeLogin()
+//     } else {
+//         $.ajax({
+//             type: "GET",
+//             url: "/search",
+//             data: {},
+//             success: function (response) {
+//                 let games = response['all_games'];
+//                 for (let i = 0; i < games.length; i++) {
+//                     if (target_game == games[i]['title'].replace(" ","")){
+//                         let like = games[i]['recommend']
+//                         let title = games[i]['title']
+//                         let n;
+//
+//                         for (n = 0; n < like.length; n++) {
+//                                 if (like[n] == login_info.id) {
+//                                     alert('이미 추천하셨습니다.');
+//                                     return;
+//                                 }
+//                         }
+//                         if (n == like.length) {
+//                             $.ajax({
+//                                 type: "POST",
+//                                 url: "/like",
+//                                 data: {id_give: login_info.id, game_give: title, recommend_give: 'false'},
+//                                 success: function (response) {
+//                                     alert(response["msg"]);
+//                                 }
+//                             })
+//                             cur_likes = parseInt(cur_likes) + 1;
+//                             document.querySelector("button.recommend-btn").innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="20" height="20" viewBox="0 0 24 24"><path d="M12 4.435c-1.989-5.399-12-4.597-12 3.568 0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-8.118-10-8.999-12-3.568z"/></svg>
+//                                                                                                  <b class="recommend-number">${cur_likes}</b>`
+//                         } else {
+//                             $.ajax({
+//                                         type: "POST",
+//                                         url: "/like",
+//                                         data: {id_give: login_info.id, game_give: title, recommend_give: 'true'},
+//                                         success: function (response) {
+//                                                     alert(response["msg"]);
+//                                                 }
+//                                     })
+//                                     cur_likes = parseInt(cur_likes) - 1;
+//                                     document.querySelector("button.recommend-btn").innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="20" height="20" viewBox="0 0 24 24"><path d="M12 9.229c.234-1.12 1.547-6.229 5.382-6.229 2.22 0 4.618 1.551 4.618 5.003 0 3.907-3.627 8.47-10 12.629-6.373-4.159-10-8.722-10-12.629 0-3.484 2.369-5.005 4.577-5.005 3.923 0 5.145 5.126 5.423 6.231zm-12-1.226c0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-7.962-9.648-9.028-12-3.737-2.338-5.262-12-4.27-12 3.737z"/></svg>
+//                                                                                                          <b class="recommend-number">${cur_likes}</b>`
+//                         }
+//                         return;
+//                     }
+//                 }
+//             }
+//         })
+//     }
+// })
+$(document).on('click', '.recommend-btn', function (event) {
+    let target_game = $(this).attr('id')
+    let cur_likes = document.querySelector("b.recommend-number").innerText
+    if (login_info.id == null){
+        alert('로그인을 먼저 해주세요')
+        makeLogin()
+    } else {
+        $.ajax({
+            type: "GET",
+            url: "/search",
+            data: {},
+            success: function (response) {
+                let games = response['all_games'];
+                for (let i = 0; i < games.length; i++) {
+                    if (target_game == games[i]['title'].replace(" ","")){
+                        let like = games[i]['recommend']
+                        let title = games[i]['title']
+                        let n;
+
+                        for (n = 0; n < like.length; n++) {
+                                if (like[n] == login_info.id){
+                                    alert('이미 추천하셨습니다.');
+                                    return;
+                                }
+                        }
+                        if (n == like.length) {
+                            $.ajax({
+                                type: "POST",
+                                url: "/like",
+                                data: {id_give: login_info.id, game_give: title},
+                                success: function (response) {
+                                    alert(response["msg"]);
+                                }
+                            })
+                            cur_likes = parseInt(cur_likes) + 1;
+                            document.querySelector("button.recommend-btn").innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="20" height="20" viewBox="0 0 24 24"><path d="M12 4.435c-1.989-5.399-12-4.597-12 3.568 0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-8.118-10-8.999-12-3.568z"/></svg>
+                                                                                                 <b class="recommend-number">${cur_likes}</b>`
+                        }
+                        return;
+                    }
+                }
+            }
+        })
+    }
+})
+
+
+$("button.dark-mode-btn").click(function () {
+    $.ajax({
+        type: "POST",
+        url: "/search",
+        data: {},
+        success: function (response) {
+            let games = response['all_games'][1]['title']
+        }
+    })
+})
+
 
 // 메인페이지 로그인 버튼 기능
 let login_info = {isLogin: false, id: null}
