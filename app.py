@@ -14,18 +14,40 @@ def homework():
 
 @app.route('/search', methods=['GET'])
 def view_games():
-    games = list(db.newgamelist_ek.find({}, {'_id': False}))
+    games = list(db.gamelist.find({}, {'_id': False}))
     return jsonify({'all_games': games})
 
-# @app.route('/like', methods=['POST'])
-# def add_recommends():
-#     id_receive = request.form['id_give']
-#     game_receive = request.form['game_give']
-#     like_game = db.newgamelist_ek.find_one({'title': game_receive})['recommend']
-#     like_game.append(id_receive)
-#     db.newgamelist_ek.update_one({'title': game_receive}, {'$set': {"recommend": like_game}})
-#
-#     return jsonify({'msg': '이 게임을 추천했습니다.'})
+
+@app.route('/member', methods=['POST'])
+def input_member():
+    id_receive = request.form['id_give']
+    pwd_receive = request.form['pwd_give']
+    doc = {
+        'id': id_receive,
+        'pwd': pwd_receive
+    }
+    db.member.insert_one(doc)
+    return jsonify({'msg': '가입을 축하합니다! 로그인 창으로 이동합니다.'})
+
+
+@app.route('/member', methods=['GET'])
+def read_members():
+    members = list(db.member.find({}, {'_id': False}))
+    return jsonify({'all_members': members})
+
+
+# 댓글 ,좋아요
+@app.route('/comment', methods=['POST'])
+def push_comment():
+    comment_receive = request.form['comment_give']
+    id_receive = request.form['ID_give']
+    game_title_receive = request.form['game_title_give']
+
+    # db 업데이트
+    # 아이디, 댓글
+    db.gamelist.update_many({'title': game_title_receive},{'$push': {"COMMENT": {'ID': id_receive, 'comment': comment_receive}}})
+
+
 
 @app.route('/like', methods=['POST'])
 def push_like():
@@ -36,56 +58,23 @@ def push_like():
 
     ##rocommend 속 id 제거/추가 기능 조건문
     if (recommend_receive == 'true'):
-        db.newgamelist_ek.update_one({'title': game_receive}, {'$pull': {'recommend': ID_receive}})
+        db.gamelist.update_one({'title': game_receive}, {'$pull': {'RECOMMEND': ID_receive}})
         return jsonify({'msg': '추천을 취소했습니다.'})
     elif (recommend_receive == 'false'):
-        db.newgamelist_ek.update_one({'title': game_receive}, {'$push': {'recommend': ID_receive}})
+        db.gamelist.update_one({'title': game_receive}, {'$push': {'RECOMMEND': ID_receive}})
         return jsonify({'msg': '추천했습니다.'})
 
+    # RECOMMEND 필드 개수 계산 -> LIKE에 입력
+    count = db.gamelist.find_one({'title': game_receive}, {})['RECOMMEND']
+    like = len(count)
+    db.gamelist.update_one({'title': "다빈치 코드"}, {'$set': {'LIKE': like}})
 
-
-@app.route('/member', methods=['POST'])
-def input_member():
-    id_receive = request.form['id_give']
-    pwd_receive = request.form['pwd_give']
-
-    doc = {
-        'id': id_receive,
-        'pwd': pwd_receive
-    }
-    db.imsi_member.insert_one(doc)
-
-    return jsonify({'msg': '가입을 축하합니다! 로그인 창으로 이동합니다.'})
-
-
-@app.route('/member', methods=['GET'])
-def read_members():
-    members = list(db.imsi_member.find({}, {'_id': False}))
-    return jsonify({'all_members': members})
-
-
-# 댓글 ,좋아요
-@app.route('/comment', methods=['POST'])
-def push_comment():
-    comment_receive = request.form['comment_give']
-    # like_receive = request.form['like_give']
-    id_receive = request.form['ID_give']
-    game_title_receive = request.form['game_title_give']
-
-    # db 업데이트
-    # 아이디, 댓글
-    print(comment_receive, id_receive, game_title_receive)
-    db.gamelist.update_many({'title': game_title_receive},
-                            {'$push': {"COMMENT": {'ID': id_receive, 'comment': comment_receive}}})
-    # # 좋아요
-    # db.gamelist.update({'title': game_title_receive},{'$set':{"LIKE" : like_receive}})
-    # return jsonify({'msg': '댓글달았다'})
+    return jsonify({'msg': '작동했습니다.'})
 
 
 @app.route('/comment', methods=['GET'])
 def show_comment():
     comment_data = list(db.gamelist.find({}, {'_id': False}))
-    # like_data
     return jsonify({'comment_data': comment_data})
 
 

@@ -41,7 +41,6 @@ function range(start, end) {
     }
     return ans;
 }
-
 let cards_arr = [];
 
 // 키워드 검색 버튼 함수 - 은경 / 종원
@@ -68,7 +67,8 @@ function gameKeywordFinder() {
                 let img = games[i]['img'];
                 let category = games[i]['category'];
                 let when = games[i]['when'];
-                let rb_img = games[i]['S3_img']
+                let rb_img = games[i]['S3_img'];
+                let likes = games[i]['RECOMMEND'].length;
                 let temp_html = ``;
                 let j, cnt = 0;
                 for (j = 0; j < clicked_keys.length; j++) {
@@ -80,12 +80,16 @@ function gameKeywordFinder() {
                             }
                         }
                     } else if (key <= 10) {
-                        if (keywords[key - 1] === when) {
-                            cnt++;
+                        for(let n = 0; n < when.length; n++) {
+                            if (keywords[key - 1] === when[n]) {
+                                cnt++;
+                            }
                         }
                     } else {
-                        if (keywords[key - 1] === category) {
-                            cnt++;
+                        for (let n = 0; n < category.length; n++) {
+                            if (keywords[key - 1] === category[n][n+1]) {
+                                cnt++;
+                            }
                         }
                     }
                 }
@@ -103,7 +107,7 @@ function gameKeywordFinder() {
                                 </div>`;
                     $("#cardHolder2").append(temp_html);
                     let temp_arr = {
-                        key: j, title: title, play_time: play_time.slice(0, -1), t_html: temp_html
+                        key: j, title: title, play_time: play_time.slice(0, -1), likes: likes, t_html: temp_html
                     }
                     cards_arr.push(temp_arr);
                 }
@@ -155,6 +159,17 @@ $('#time_arr').click(function () { //플탐순 정렬
         $("#cardHolder2").append(result[i].t_html);
     }
 });
+$('#like_arr').click(function () { //추천순 정렬
+    $("#cardHolder2").empty();
+    var result;
+    console.log('추천순 정렬')
+    result = cards_arr.sort(function (a, b) {
+        return b.likes - a.likes
+    });
+    for (let i = 0; i < result.length; i++) {
+        $("#cardHolder2").append(result[i].t_html);
+    }
+});
 
 //찾아주세요! 버튼 함수 (아무것도 누르지 않았을때 alert, 결과페이지에 누른 버튼 삽입) - 은경
 function btn_next() {
@@ -195,8 +210,6 @@ function gameTextFinder() {
                 let title = games[i]['title'];
                 let rb_img = games[i]['S3_img']
                 let temp_html = ``;
-
-                const searchBtn = $("input.search-input");
                 let title_length = title.length;
                 let text_length = newValue.length;
                 if (text_length <= title_length && text_length != 0) {
@@ -256,18 +269,16 @@ $('.search-input').keyup(function () {
                 $("#autoMaker").show();
             }
         });
-        $('#autoMaker').children().each(function () {
-            $(this).click(function () {
-                $('.search-input').val($(this).text());
-                $('#insert_target').val("key : " + $(this).attr('key') + ", data : " + $(this).text());
-                isComplete = true;
-            });
-        });
     } else {
         $('#autoMaker').children().remove();
         $("#autoMaker").hide();
     }
 });
+$(document).on('click','.hint',function() {
+    $('.search-input').val($(this).text());
+    $('#insert_target').val("key : " + $(this).attr('key') + ", data : " + $(this).text());
+    isComplete = true;
+})
 $('.search-input').keydown(function (event) {
     if (isComplete) {  //autoMaker 자식이 선택 되었으면 초기화
         $('#insert_target').val('')
@@ -323,10 +334,6 @@ window.onload = function () {
         }
     },)
 }
-// let i = 10
-// let j = '10'
-// i == j true (type을 따지지 않고 값만)
-// i === j false (type까지 따짐)
 
 
 // dark mode - 종원
@@ -363,6 +370,7 @@ $("button.dark-mode-btn").click(function () {
 
 
 let newCommentInfo = {title: '', id: '', comment: ''}
+let isRecommend;
 // 모달창 생성 - 종원
 $(document).on('click', ".card", function (event) {
     $(".modal_content").empty();
@@ -379,23 +387,21 @@ $(document).on('click', ".card", function (event) {
             for (let i = 0; i < comment_data.length; i++) {
                 let gameComments = comment_data[i]['COMMENT']
                 let gameTitle = comment_data[i]['title']
-
                 if (target_path_2 === gameTitle) {
                     let temp_comment = gameComments.map((data) => {
-                        return `<li><span>${data.ID}</span><span>${data.comment}</span></li>`
-
-                    })
+                            return `<li><span>${data.ID}</span><span>${data.comment}</span></li>`
+                        }
+                    )
                     temp_comments = temp_comment.toString().replaceAll(",", "")
-
-                    console.log($('.interaction-comment'))
                 }
-
 
 
             }
 
+
         }
     })
+
     $.ajax({
             type: "GET",
             url: "/search",
@@ -412,15 +418,19 @@ $(document).on('click', ".card", function (event) {
                     let rb_when = games[i]['when']
                     let rb_yt_link = games[i]['youtube_link']
                     let rb_level = games[i]['level']
-                    let KEY = rb_title.replace(" ","")
-                    let likes_num = games[i]['recommend'].length
-                    let like = games[i]['recommend']
+                    let KEY = rb_title.replace(" ", "")
+                    let likes_num = games[i]['RECOMMEND'].length
+                    let like = games[i]['RECOMMEND']
                     let n;
                     let like_svg = `<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="20" height="20" viewBox="0 0 24 24"><path d="M12 9.229c.234-1.12 1.547-6.229 5.382-6.229 2.22 0 4.618 1.551 4.618 5.003 0 3.907-3.627 8.47-10 12.629-6.373-4.159-10-8.722-10-12.629 0-3.484 2.369-5.005 4.577-5.005 3.923 0 5.145 5.126 5.423 6.231zm-12-1.226c0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-7.962-9.648-9.028-12-3.737-2.338-5.262-12-4.27-12 3.737z"/></svg>`;
                     for (n = 0; n < like.length; n++) {
-                        if (like[n] == login_info.id){
+                        if (like[n] == login_info.id) {
                             like_svg = `<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="20" height="20" viewBox="0 0 24 24"><path d="M12 4.435c-1.989-5.399-12-4.597-12 3.568 0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-8.118-10-8.999-12-3.568z"/></svg>`
+                            isRecommend = 'true'
                         }
+                    }
+                    if (n == like.length) {
+                            isRecommend = 'false'
                     }
                     if (target_path_2 === rb_title) {
                         newCommentInfo.title = rb_title
@@ -464,18 +474,18 @@ $(document).on('click', ".card", function (event) {
                                                   </div>
                                                   <div class="info-content">
                                                     <b>게임 소개 영상</b>
-                                                    <a href="${rb_yt_link}" target="_blank" class="content_url"><svg xmlns="http://www.w3.org/2000/svg" fill="tomato" width="24" height="24" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></a>
+                                                    <a href="${rb_yt_link}" target="_blank" class="content_url"><svg xmlns="http://www.w3.org/2000/svg" fill="tomato" width="28" height="28" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></a>
                                                   </div>
                                                 </div>
                                               </div>
-                                              <form class="content-bottom" id=${KEY}>
+                                              <form class="content-bottom" id=${KEY} >
                                                 <div class="content-interaction">
                                                     <div class="interaction-button">
                                                     <button type="button" class="recommend-btn" id=${KEY}>
                                                         ${like_svg}
                                                         <b class="recommend-number">${likes_num}</b>
                                                     </button>
-                                                    <button>댓글</button>
+                                                    <button type="button">댓글</button>
                                                     </div>
                                                     <ul class="interaction-comment" id="${KEY}">
                                                          ${temp_comments}
@@ -487,61 +497,64 @@ $(document).on('click', ".card", function (event) {
                                         
                                         `;
                         $(".modal_content").append(temp_html);
+
+
+                        $(".content-bottom").submit(function (event) {
+                                event.preventDefault()
+                                const newComment = event.target[2]
+                                newCommentInfo.comment = newComment.value
+                                console.log(newCommentInfo.title, newCommentInfo.id, newCommentInfo.comment)
+                                if (newCommentInfo.id === null) {
+                                    alert('로그인을 먼저 해주세요')
+                                    return
+                                }
+
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/comment",
+                                    data: {
+                                        game_title_give: newCommentInfo.title,
+                                        ID_give: newCommentInfo.id,
+                                        comment_give: newCommentInfo.comment,
+                                    },
+                                    success: function (response) {
+                                    }
+                                })
+
+                                if (target_path_2 === newCommentInfo.title) {
+                                    let temp_html = `<li><span>${login_info.id}</span><span>${newComment.value}</span></li>`
+
+                                    if (newComment.value.trim().length > 0) {
+                                        $(".interaction-comment").append(temp_html)
+                                    }
+                                    newComment.value = ""
+                                }
+                            }
+                        )
+
+
                     } else if (target_path_3 == 'undefined') {
                         $('.modal').fadeOut()
                     }
+
                 }
 
-                $(".content-bottom").submit(function (event) {
-                        event.preventDefault()
-                        const newComment = event.target[2]
-                        newCommentInfo.comment = newComment.value
-                        console.log(newCommentInfo.title, newCommentInfo.id, newCommentInfo.comment)
-                        if (newCommentInfo.id === null) {
-                            alert('로그인을 먼저 해주세요')
-                            return
-                        }
-
-                        $.ajax({
-                            type: "POST",
-                            url: "/comment",
-                            data: {
-                                game_title_give: newCommentInfo.title,
-                                ID_give: newCommentInfo.id,
-                                comment_give: newCommentInfo.comment,
-                            },
-                            success: function (response) {
-                            }
-                        })
-
-                        if (target_path_2 === newCommentInfo.title) {
-                            let temp_html = `<li><span>${login_info.id}</span><span>${newComment.value}</span></li>`
-
-                            if (newComment.value.trim().length > 0) {
-                                $(".interaction-comment").append(temp_html)
-                            }
-                            newComment.value = ""
-                        }
-
-                    }
-                )
 
             }
         }
     )
     $('.modal').fadeIn()
-
 })
 $(document).on('click', ".content-top__close", function (event) {
     $('.modal').fadeOut()
 })
 
+
 //좋아요 함수
-let isRecommend = 'false';
 $(document).on('click', '.recommend-btn', function (event) {
     let target_game = $(this).attr('id')
     let cur_likes = document.querySelector("b.recommend-number").innerText
-    if (login_info.id == null){
+    if (login_info.id == null) {
         alert('로그인을 먼저 해주세요')
         makeLogin()
     } else {
@@ -552,30 +565,37 @@ $(document).on('click', '.recommend-btn', function (event) {
             success: function (response) {
                 let games = response['all_games'];
                 for (let i = 0; i < games.length; i++) {
-                    if (target_game == games[i]['title'].replace(" ","")){
-                        let like = games[i]['recommend']
+                    if (target_game == games[i]['title'].replace(" ", "")) {
                         let title = games[i]['title']
+                        let like = games[i]['RECOMMEND']
                         let n;
                         for (n = 0; n < like.length; n++) {
-                                if (like[n] == login_info.id){
-                                    isRecommend = 'true'
-                                    $.ajax({
-                                        type: "POST",
-                                        url: "/like",
-                                        data: { id_give: login_info.id, game_give: title, recommend_give: isRecommend},
-                                        success: function (response) {
-                                            alert(response["msg"]);
-                                        }
-                                    })
-                                    cur_likes = parseInt(cur_likes) - 1;
-                                    document.querySelector("button.recommend-btn").innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="20" height="20" viewBox="0 0 24 24"><path d="M12 9.229c.234-1.12 1.547-6.229 5.382-6.229 2.22 0 4.618 1.551 4.618 5.003 0 3.907-3.627 8.47-10 12.629-6.373-4.159-10-8.722-10-12.629 0-3.484 2.369-5.005 4.577-5.005 3.923 0 5.145 5.126 5.423 6.231zm-12-1.226c0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-7.962-9.648-9.028-12-3.737-2.338-5.262-12-4.27-12 3.737z"/></svg>
-                                                                                                        <b class="recommend-number">${cur_likes}</b>`
-                                    isRecommend = 'false'
-                                    return;
-
+                            if (like[n] == login_info.id) {
+                                isRecommend = 'true'
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/like",
+                                    data: {id_give: login_info.id, game_give: title, recommend_give: isRecommend},
+                                    success: function (response) {
+                                        alert(response["msg"]);
+                                    }
+                                })
+                                cur_likes = parseInt(cur_likes) - 1;
+                                for(let j=0; j < cards_arr.length; j++){
+                                if(cards_arr[j]['title'] == title){
+                                    cards_arr[j]['likes'] = cur_likes
                                 }
+                            }
+
+                                document.querySelector("button.recommend-btn").innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="20" height="20" viewBox="0 0 24 24"><path d="M12 9.229c.234-1.12 1.547-6.229 5.382-6.229 2.22 0 4.618 1.551 4.618 5.003 0 3.907-3.627 8.47-10 12.629-6.373-4.159-10-8.722-10-12.629 0-3.484 2.369-5.005 4.577-5.005 3.923 0 5.145 5.126 5.423 6.231zm-12-1.226c0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-7.962-9.648-9.028-12-3.737-2.338-5.262-12-4.27-12 3.737z"/></svg>
+                                                                                                        <b class="recommend-number">${cur_likes}</b>`
+                                isRecommend = 'false'
+                                return;
+
+                            }
                         }
                         if (n == like.length) {
+                            isRecommend = 'false'
                             $.ajax({
                                 type: "POST",
                                 url: "/like",
@@ -585,6 +605,12 @@ $(document).on('click', '.recommend-btn', function (event) {
                                 }
                             })
                             cur_likes = parseInt(cur_likes) + 1;
+                            for(let j=0; j < cards_arr.length; j++){
+                                if(cards_arr[j]['title'] == title){
+                                    cards_arr[j]['likes'] = cur_likes
+                                }
+                            }
+
                             document.querySelector("button.recommend-btn").innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="20" height="20" viewBox="0 0 24 24"><path d="M12 4.435c-1.989-5.399-12-4.597-12 3.568 0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-8.118-10-8.999-12-3.568z"/></svg>
                                                                                                  <b class="recommend-number">${cur_likes}</b>`
                             isRecommend = 'true'
@@ -610,11 +636,22 @@ $("button.dark-mode-btn").click(function () {
 })
 
 
+$("button.dark-mode-btn").click(function () {
+    $.ajax({
+        type: "POST",
+        url: "/search",
+        data: {},
+        success: function (response) {
+            let games = response['all_games'][1]['title']
+        }
+    })
+})
+
 // 메인페이지 로그인 버튼 기능
 let login_info = {isLogin: false, id: null}
 
 function isLogin() {
-    if (login_info['isLogin'] == false) {
+    if (login_info.isLogin === false) {
         makeLogin();
         $(".modal_content").css("padding-right", "0");
         $(".modal_content").css("padding", "40px");
@@ -624,6 +661,8 @@ function isLogin() {
         $(".login__btn").text('login');
         $(".login__btn").css("background-color", "mediumseagreen");
         $("#main-body > div.recommend-box > h2").text("지금, 이 보드게임 어때요?");
+        localStorage.removeItem('isLogin')
+        alert("로그아웃 되었습니다")
     }
 }
 
@@ -756,6 +795,7 @@ function isLoginValid() {
                             $("#main-body > div.recommend-box > h2").text(login_info["id"] + "님! 지금, 이 보드게임 어때요?");
                             alert('로그인 완료!');
                             $(".modal").hide();
+                            localStorage.setItem("isLogin", id)
                             return;
                         } else {
                             $(".login__hint").text("비밀번호가 틀렸습니다.");
@@ -769,4 +809,22 @@ function isLoginValid() {
             }
         })
     }
+}
+
+const storedInfo = localStorage.getItem('isLogin')
+login_info.id = storedInfo
+
+if (storedInfo === login_info.id) {
+    login_info.id = storedInfo
+    if (login_info.id !== null) {
+        login_info.isLogin = true
+        console.log(login_info)
+        $(".login__btn").css("background-color", "seagreen");
+        $(".login__btn").text('logout');
+        $("#main-body > div.recommend-box > h2").text(login_info["id"] + "님! 지금, 이 보드게임 어때요?");
+        console.log($('#cmtDelete'))
+    } else {
+
+    }
+
 }
